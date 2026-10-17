@@ -70,7 +70,9 @@ async function api(path, { method = 'GET', body } = {}) {
   }
   let res;
   try {
-    res = await fetch('/api' + path, { method, headers, body });
+    // Point directly to your deployed Vercel backend
+    const API_BASE_URL = 'https://eventcalendar-zeta.vercel.app';
+    res = await fetch(API_BASE_URL + path, { method, headers, body });
   } catch {
     throw new Error('Cannot reach the server. Check your connection.');
   }
