@@ -7,7 +7,8 @@ class User(db.Model):
     User_ID = db.Column(db.String(20), primary_key=True) 
     User_Name = db.Column(db.String(100), nullable=False)
     User_Email = db.Column(db.String(120), unique=True, nullable=False)
-    User_Authority = db.Column(db.String(50), nullable=False) 
+    User_Authority = db.Column(db.String(50), nullable=False)
+    Password_Hash = db.Column(db.String(255), nullable=True)
     Device_Token = db.Column(db.String(255), nullable=True) # For Mobile Push Notifications
 
     applications = db.relationship('RecruitmentApplication', backref='user', lazy=True, cascade="all, delete-orphan")

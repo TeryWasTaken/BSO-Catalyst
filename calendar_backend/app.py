@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, send_from_directory
 from extensions import db, ma, jwt, cors
 from routes.events import events_bp
 
@@ -12,15 +12,17 @@ from routes.admin import admin_bp
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+FRONTEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'frontend'))
 
 def create_app():
-    app = Flask(__name__)
+    # The website (../frontend) is served by Flask itself, so one command runs everything.
+    app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
     
     # Configurations
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///calendar_tracking.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-    app.config['JWT_SECRET_KEY'] = 'super-secret-change-this-in-production'
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'super-secret-change-this-in-production')
     app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  
     
     # Create necessary folders
@@ -42,6 +44,10 @@ def create_app():
     app.register_blueprint(events_bp)
     app.register_blueprint(users_bp)
     app.register_blueprint(admin_bp)  
+
+    @app.route('/')
+    def index():
+        return send_from_directory(FRONTEND_DIR, 'index.html')
 
     with app.app_context():
         import models

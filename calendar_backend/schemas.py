@@ -5,6 +5,7 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = User
         load_instance = True
+        exclude = ("Password_Hash", "Device_Token")
 
 class AssignmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

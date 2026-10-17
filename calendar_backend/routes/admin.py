@@ -43,6 +43,50 @@ def create_payment():
     db.session.commit()
     return jsonify({"message": "Payment created", "id": new_task.Payment_ID}), 201
 
+def _parse_window(data):
+    """Validate name/start_date/end_date. Returns (name, start, end, error_response)."""
+    name = (data.get('name') or '').strip()
+    if not name or not data.get('start_date') or not data.get('end_date'):
+        return None, None, None, (jsonify({"error": "name, start_date and end_date are required"}), 400)
+    try:
+        start = parser.parse(data['start_date'])
+        end = parser.parse(data['end_date'])
+    except (ValueError, OverflowError):
+        return None, None, None, (jsonify({"error": "Invalid date format"}), 400)
+    if end < start:
+        return None, None, None, (jsonify({"error": "end_date must not be before start_date"}), 400)
+    return name, start, end, None
+
+@admin_bp.route('/events', methods=['POST'])
+@jwt_required()
+def create_event():
+    if not is_admin(get_jwt_identity()): return jsonify({"error": "Unauthorized"}), 403
+    data = request.get_json(silent=True) or {}
+    name, start, end, err = _parse_window(data)
+    if err: return err
+    new_event = Event(
+        Event_Name=name, Event_TimeDateStart=start,
+        Event_TimeDateEnd=end, Event_Desc=data.get('description')
+    )
+    db.session.add(new_event)
+    db.session.commit()
+    return jsonify({"message": "Event created", "id": new_event.Event_ID}), 201
+
+@admin_bp.route('/recruitments', methods=['POST'])
+@jwt_required()
+def create_recruitment():
+    if not is_admin(get_jwt_identity()): return jsonify({"error": "Unauthorized"}), 403
+    data = request.get_json(silent=True) or {}
+    name, start, end, err = _parse_window(data)
+    if err: return err
+    new_recr = Recruitment(
+        Recr_Name=name, Recr_TimeDateStart=start,
+        Recr_TimeDateEnd=end, Recr_Desc=data.get('description')
+    )
+    db.session.add(new_recr)
+    db.session.commit()
+    return jsonify({"message": "Recruitment created", "id": new_recr.Recr_ID}), 201
+
 # ---------------------------------------------------------
 # GRADING & VERIFICATION ROUTES
 # ---------------------------------------------------------

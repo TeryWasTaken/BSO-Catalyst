@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+calendar_backend/instance/
+calendar_backend/uploads/
