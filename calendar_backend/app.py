@@ -19,7 +19,14 @@ def create_app():
     app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
     
     # Configurations
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///calendar_tracking.db'
+    # ✅ New code: Load cloud database URL or fallback to local SQLite
+    db_url = os.environ.get('DATABASE_URL', 'sqlite:///' + os.path.join(BASE_DIR, 'calendar_tracking.db'))
+
+    # Fix SQLAlchemy compatibility for Postgres URLs starting with 'postgres://'
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'super-secret-change-this-in-production')
