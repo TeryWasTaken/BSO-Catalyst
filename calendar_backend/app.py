@@ -55,6 +55,9 @@ def create_app():
 
     return app
 
+# Define 'app' at the top level so Vercel can find it
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
+    # Vercel will ignore this block, but it allows you to still run it locally
     app.run(debug=True, host='0.0.0.0', port=5000)
